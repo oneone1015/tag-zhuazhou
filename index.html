@@ -744,15 +744,17 @@ transition: border-color 0.2s;
   }
 
   function renderResults(rows) {
-    const validRows = rows.filter(r => r.voter_name && r.item_name);
+    const validRows = rows.filter(r => (r.voter_name || r.Voter_name) && (r.item_name || r.Item_name));
     const tally = {};
     const votersByItem = {};
     ITEMS.forEach(item => { tally[item.name] = 0; votersByItem[item.name] = []; });
 
     validRows.forEach(row => {
-      if (tally[row.item_name] !== undefined) {
-        tally[row.item_name]++;
-        votersByItem[row.item_name].push(row.voter_name);
+      const itemName = row.item_name || row.Item_name;
+      const voterName = row.voter_name || row.Voter_name;
+      if (tally[itemName] !== undefined) {
+        tally[itemName]++;
+        votersByItem[itemName].push(voterName);
       }
     });
 
