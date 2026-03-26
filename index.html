@@ -24,34 +24,10 @@
 body {
 font-family: ‘DM Sans’, sans-serif;
 background: var(–cream);
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘300’ height=‘300’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.65’ numOctaves=‘3’ stitchTiles=‘stitch’/%3E%3CfeColorMatrix type=‘saturate’ values=‘0’/%3E%3C/filter%3E%3Crect width=‘300’ height=‘300’ filter=‘url(%23noise)’ opacity=‘0.03’/%3E%3C/svg%3E”);
 color: var(–ink);
 min-height: 100vh;
 overflow-x: hidden;
-}
-
-/* Background decoration */
-body::before {
-content: ‘’;
-position: fixed;
-top: -200px; right: -200px;
-width: 600px; height: 600px;
-background: radial-gradient(circle, rgba(139,110,60,0.07) 0%, transparent 70%);
-pointer-events: none;
-z-index: 0;
-}
-body::after {
-content: ‘’;
-position: fixed;
-bottom: -150px; left: -150px;
-width: 500px; height: 500px;
-background: radial-gradient(circle, rgba(139,110,60,0.05) 0%, transparent 70%);
-pointer-events: none;
-z-index: 0;
-}
-
-/* Subtle paper grain */
-body {
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘300’ height=‘300’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.65’ numOctaves=‘3’ stitchTiles=‘stitch’/%3E%3CfeColorMatrix type=‘saturate’ values=‘0’/%3E%3C/filter%3E%3Crect width=‘300’ height=‘300’ filter=‘url(%23noise)’ opacity=‘0.03’/%3E%3C/svg%3E”);
 }
 
 .container {
@@ -918,7 +894,7 @@ opacity: 0.6;
 </div>
 
 <script>
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwzKmFBygZHTiRdKBoEZjbfiePVg7OwY_Il8eQgOSy82QjU9Ta1cLqj0_XLYeLnmsWh/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyXYqBaJkzMM206bq0BPkdAQhCiHtRrUL3hI2Uiiq3sh_RV97EaHJFvE4w2TnFKNP18/exec';
 
   const ITEMS = [
     { name: 'Globe', emoji: '🌍', desc: 'Explorer & World Traveler' },
@@ -1002,9 +978,43 @@ opacity: 0.6;
     document.getElementById('results-error').style.display = 'none';
 
     try {
-      const res = await fetch(SHEET_URL + '?t=' + Date.now(), { mode: 'cors' });
-      const rows = await res.json();
+      // Use no-cors-friendly approach via script injection
+      const url = SHEET_URL + '?callback=handleResults&t=' + Date.now();
+      
+      // Remove old script tag if exists
+      const old = document.getElementById('results-script');
+      if (old) old.remove();
+      
+      const script = document.createElement('script');
+      script.id = 'results-script';
+      script.src = url;
+      
+      // Timeout fallback
+      const timeout = setTimeout(() => {
+        document.getElementById('results-loading').style.display = 'none';
+        const errEl = document.getElementById('results-error');
+        errEl.textContent = 'Could not load results. Please try again.';
+        errEl.style.display = 'block';
+      }, 8000);
+      
+      window.handleResults = function(rows) {
+        clearTimeout(timeout);
+        renderResults(rows);
+      };
+      
+      document.body.appendChild(script);
 
+    } catch (err) {
+      document.getElementById('results-loading').style.display = 'none';
+      const errEl = document.getElementById('results-error');
+      errEl.textContent = 'Could not load results. Please try again.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  function renderResults(rows) {
+
+  function renderResults(rows) {
       const validRows = rows.filter(r => r.voter_name && r.item_name);
 
       // Tally votes
@@ -1052,19 +1062,11 @@ opacity: 0.6;
       document.getElementById('results-loading').style.display = 'none';
       document.getElementById('results-content').style.display = 'block';
 
-      // Animate bars
       setTimeout(() => {
         document.querySelectorAll('.result-bar').forEach(bar => {
           bar.style.width = bar.style.width;
         });
       }, 50);
-
-    } catch (err) {
-      document.getElementById('results-loading').style.display = 'none';
-      const errEl = document.getElementById('results-error');
-      errEl.textContent = 'Could not load results. Make sure the Google Sheet is set up correctly.';
-      errEl.style.display = 'block';
-    }
   }
 
   // Admin & photo functions
