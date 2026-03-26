@@ -918,7 +918,7 @@ opacity: 0.6;
 </div>
 
 <script>
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwYfUst8ybKrEuHrPIQk7NDVF4qJjB4Cb-ikz060toj-3ra5nXOOxSiUVyD3MfUBkIQ/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwzKmFBygZHTiRdKBoEZjbfiePVg7OwY_Il8eQgOSy82QjU9Ta1cLqj0_XLYeLnmsWh/exec';
 
   const ITEMS = [
     { name: 'Globe', emoji: '🌍', desc: 'Explorer & World Traveler' },
@@ -1002,7 +1002,7 @@ opacity: 0.6;
     document.getElementById('results-error').style.display = 'none';
 
     try {
-      const res = await fetch(SHEET_URL + '?t=' + Date.now());
+      const res = await fetch(SHEET_URL + '?t=' + Date.now(), { mode: 'cors' });
       const rows = await res.json();
 
       const validRows = rows.filter(r => r.voter_name && r.item_name);
